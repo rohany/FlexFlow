@@ -813,12 +813,16 @@ class FFConfig(object):
         return ffc().flexflow_get_current_time(self.handle)
 
     def begin_trace(self, trace_id):
-        if self.enable_tracing:
-            ffc().flexflow_begin_trace(self.handle, trace_id)
+        # if self.enable_tracing:
+        # print("BEGINNING TRACE")
+        # ffc().flexflow_begin_trace(self.handle, trace_id)
+        pass
 
     def end_trace(self, trace_id):
-        if self.enable_tracing:
-            ffc().flexflow_end_trace(self.handle, trace_id)
+        # if self.enable_tracing:
+        # print("ENDING TRACE")
+        # ffc().flexflow_end_trace(self.handle, trace_id)
+        pass
 
 
 # -----------------------------------------------------------------------

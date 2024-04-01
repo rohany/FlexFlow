@@ -126,7 +126,8 @@ def init_flexflow_runtime(configs_dict: Optional[dict] = None, **kwargs):
             for arg in ff_args:
                 if arg not in ff_arg_to_sysarg:
                     # warnings.warn(f"Ignoring parameter {arg}: not recognized.")
-                    continue
+                    # continue
+                    sys.argv += ff_args[arg].split(" ")
                 else:
                     sys_arg = [ff_arg_to_sysarg[arg]]
                     if type(ff_args[arg]) == bool:
@@ -136,6 +137,7 @@ def init_flexflow_runtime(configs_dict: Optional[dict] = None, **kwargs):
                         sys_arg += [str(ff_args[arg])]
                     sys.argv += sys_arg
 
+            print("NEW ARGV TO LEGION PYTHON: ", sys.argv)
             legion_canonical_python_main(sys.argv)
             atexit.register(legion_canonical_python_cleanup)
         else:
