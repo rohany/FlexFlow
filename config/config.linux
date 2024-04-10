@@ -31,7 +31,7 @@ fi
 # To pass more than one value, separate architecture numbers with a comma (e.g. FF_CUDA_ARCH=70,75).
 # Alternatively, set "FF_CUDA_ARCH=autodetect" to build FlexFlow for all architectures detected on the machine,
 # or set "FF_CUDA_ARCH=all" to build FlexFlow for all supported GPU architectures
-FF_CUDA_ARCH=${FF_CUDA_ARCH:-"autodetect"}
+FF_CUDA_ARCH=${FF_CUDA_ARCH:-"90"}
 # FF_HIP_ARCH only supports building for a specific AMD architecture, a list of architectures separated by a comma
 # or all available architectures. TODO: support autodetect
 FF_HIP_ARCH=${FF_HIP_ARCH:-"all"}
@@ -50,16 +50,16 @@ NCCL_DIR=${NCCL_DIR:-"/usr/local/cuda"}
 FF_USE_PYTHON=${FF_USE_PYTHON:-ON}
 
 # set Legion networks
-FF_LEGION_NETWORKS=${FF_LEGION_NETWORKS:-}
+FF_LEGION_NETWORKS=${FF_LEGION_NETWORKS:-ucx}
 
 # select GASNET conduit
 FF_GASNET_CONDUIT=${FF_GASNET_CONDUIT:-ibv}
 
 # set UCX dir if Legion networks is set to ucx
-UCX_DIR=${UCX_DIR:-""}
+UCX_DIR=${UCX_DIR:-/opt/ucx-install/}
 
 # build C++ examples
-FF_BUILD_ALL_EXAMPLES=${FF_BUILD_ALL_EXAMPLES:-OFF}
+FF_BUILD_ALL_EXAMPLES=${FF_BUILD_ALL_EXAMPLES:-ON}
 FF_BUILD_ALL_INFERENCE_EXAMPLES=${FF_BUILD_ALL_INFERENCE_EXAMPLES:-ON}
 
 # build C++ unit tests
