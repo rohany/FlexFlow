@@ -4204,6 +4204,10 @@ class RequestManager(object):
         return ffc().flexflow_request_manager_set_max_tokens_per_batch(
             self.handle, max_tokens)
     
+    def set_max_spec_tree_token_num(self, max_tokens):
+        return ffc().flexflow_request_manager_set_max_spec_tree_token_num(
+            self.handle, max_tokens)
+    
     def set_max_sequence_length(self, max_length):
         return ffc().flexflow_request_manager_set_max_sequence_length(
             self.handle, max_length)
