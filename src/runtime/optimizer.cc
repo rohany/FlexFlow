@@ -188,9 +188,9 @@ void SGDOptimizer::update(const ParallelTensor p) {
     // MustEpochLauncher must_epoch_launcher;
     // must_epoch_launcher.add_index_task(launcher);
     launcher.concurrent = true;
-    FutureMap fm = runtime->execute_index_space(ctx, launcher);
+    runtime->execute_index_space(ctx, launcher);
     // runtime->execute_must_epoch(ctx, must_epoch_launcher);
-    runtime->issue_execution_fence(ctx);
+    // runtime->issue_execution_fence(ctx);
   } else {
     assert(false);
   }
@@ -311,7 +311,7 @@ void SGDOptimizer::nccl_update_task(Task const *task,
     }
   }
 
-  nccl_update_task_gpu(op, meta, w_grad_ptr, size, w_ptr, v_ptr);
+  nccl_update_task_gpu(ctx, runtime, op, meta, w_grad_ptr, size, w_ptr, v_ptr);
 }
 #endif
 

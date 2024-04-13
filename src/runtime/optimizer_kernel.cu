@@ -75,7 +75,9 @@ __host__ void SGDOptimizer::ps_update_task_gpu(SGDOptimizer const *op,
 }
 
 #ifdef FF_USE_NCCL
-__host__ void SGDOptimizer::nccl_update_task_gpu(SGDOptimizer const *op,
+__host__ void SGDOptimizer::nccl_update_task_gpu(Legion::Context ctx,
+                                                 Legion::Runtime* runtime,
+                                                 SGDOptimizer const *op,
                                                  OpMeta const *meta,
                                                  float const *w_grad_ptr,
                                                  size_t size,
@@ -85,6 +87,7 @@ __host__ void SGDOptimizer::nccl_update_task_gpu(SGDOptimizer const *op,
   // fprintf(stderr, "weight(%p) Before ncclAllReduce...\n", w_grad_ptr);
   cudaStream_t stream;
   checkCUDA(get_legion_stream(&stream));
+  runtime->concurrent_task_barrier(ctx);
   checkNCCL(ncclAllReduce(w_grad_ptr,
                           (float *)w_grad_ptr,
                           size,
@@ -94,6 +97,8 @@ __host__ void SGDOptimizer::nccl_update_task_gpu(SGDOptimizer const *op,
                           stream));
   // fprintf(stderr, "weight(%p) After ncclAllReduce...\n", w_grad_ptr);
   // print_tensor<float>((float*)w_grad_ptr, 16, "[After ncclAllReduce]");
+  runtime->concurrent_task_barrier(ctx);
+  checkCUDA(cudaDeviceSynchronize());
 
   // Step 2: SGD update
   sgd_update<<<GET_BLOCKS(size), CUDA_NUM_THREADS, 0, stream>>>(
@@ -105,7 +110,7 @@ __host__ void SGDOptimizer::nccl_update_task_gpu(SGDOptimizer const *op,
       w_grad_ptr,
       v_ptr,
       w_ptr);
-  // checkCUDA(cudaDeviceSynchronize());
+  checkCUDA(cudaDeviceSynchronize());
 }
 #endif
 

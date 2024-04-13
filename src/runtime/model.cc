@@ -2855,8 +2855,12 @@ void FFModel::get_metrics() {
 void FFModel::backward(int seq_length) {
   iter_config.seq_length = seq_length;
   assert(config.computationMode == COMP_MODE_TRAINING);
+
+  // TODO (rohany, mike): Disabling metrics computation appears to
+  //  help us avoid a bug around deadlocks + NCCL / tracing.
   // Compute metrics
-  compute_metrics();
+  // compute_metrics();
+
   // Compute the gradients of the final operator wrt loss
   Op *final_operator = get_final_operator();
   assert(final_operator->numOutputs == 1);
