@@ -296,6 +296,7 @@ void FFMapper::select_task_options(const MapperContext ctx,
     // control replicate top level task
     if (enable_control_replication) {
       output.replicate = true;
+      output.map_locally = false;
     }
     return;
   }
@@ -560,6 +561,11 @@ void FFMapper::map_task(const MapperContext ctx,
       assert(output.target_procs[i].address_space() == node_id);
     }
   }
+
+  if (input.shard_processor.exists()) {
+    output.target_procs = std::vector<Processor>{input.shard_processor};
+  }
+
   // Find instances that still need to be mapped
   std::vector<std::set<FieldID>> missing_fields(task.regions.size());
   runtime->filter_instances(ctx,

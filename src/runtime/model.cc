@@ -6748,6 +6748,7 @@ void register_flexflow_internal_tasks(Runtime *runtime,
     TaskVariantRegistrar registrar(SGD_UPD_NCCL_TASK_ID, "SGD NCCL Update");
     registrar.add_constraint(ProcessorConstraint(Processor::TOC_PROC));
     registrar.set_leaf();
+    registrar.set_concurrent();
     if (pre_register) {
       Runtime::preregister_task_variant<SGDOptimizer::nccl_update_task>(
           registrar, "SGD NCCL Update Task");
@@ -6897,6 +6898,7 @@ void register_flexflow_internal_tasks(Runtime *runtime,
     TaskVariantRegistrar registrar(NCCL_INIT_COMMS_TASK_ID,
                                    "NCCL Init Communicators");
     registrar.add_constraint(ProcessorConstraint(Processor::TOC_PROC));
+    registrar.set_concurrent();
     registrar.set_leaf();
     if (pre_register) {
       Runtime::preregister_task_variant<ncclComm_t, Op::init_nccl_comms_task>(
