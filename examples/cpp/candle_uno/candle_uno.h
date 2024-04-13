@@ -26,6 +26,7 @@ struct CandleConfig {
   map<string, int> feature_shapes;
   map<string, string> input_features;
   std::string dataset_path;
+  bool trace = false;
 };
 
 class DataLoader {

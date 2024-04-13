@@ -150,6 +150,7 @@ void FlexFlow::top_level_task(Task const *task,
                 data_loader.num_samples / ff_config.batchSize);
   double ts_start = Realm::Clock::current_time_in_microseconds();
   for (int epoch = 0; epoch < ff_config.epochs; epoch++) {
+    LEGION_PRINT_ONCE(runtime, ctx, stdout, "Epoch: %d\n", epoch);
     data_loader.reset();
     ff.reset_metrics();
     int iterations = data_loader.num_samples / ff_config.batchSize;
@@ -162,12 +163,12 @@ void FlexFlow::top_level_task(Task const *task,
       } else {
         data_loader.next_batch(ff);
       }
-      // runtime->begin_trace(ctx, 111 /*trace_id*/);
+      if (candle_config.trace) runtime->begin_trace(ctx, 111 /*trace_id*/);
       ff.forward();
       ff.zero_gradients();
       ff.backward();
       ff.update();
-      // runtime->end_trace(ctx, 111 /*trace_id*/);
+      if (candle_config.trace) runtime->end_trace(ctx, 111 /*trace_id*/);
     }
   }
   runtime->issue_execution_fence(ctx);
@@ -176,7 +177,8 @@ void FlexFlow::top_level_task(Task const *task,
   future.get_void_result();
   double ts_end = Realm::Clock::current_time_in_microseconds();
   double run_time = 1e-6 * (ts_end - ts_start);
-  printf("ELAPSED TIME = %.4fs, THROUGHPUT = %.2f samples/s\n",
+  LEGION_PRINT_ONCE(runtime, ctx, stdout,
+         "ELAPSED TIME = %.4fs, THROUGHPUT = %.2f samples/s\n",
          run_time,
          data_loader.num_samples * ff_config.epochs / run_time);
 }
@@ -203,6 +205,10 @@ void parse_input_args(char **argv, int argc, CandleConfig &config) {
     }
     if (!strcmp(argv[i], "--dataset")) {
       config.dataset_path = std::string(argv[++i]);
+      continue;
+    }
+    if (!strcmp(argv[i], "--trace")) {
+      config.trace = true;
       continue;
     }
   }
