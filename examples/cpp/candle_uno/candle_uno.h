@@ -27,6 +27,7 @@ struct CandleConfig {
   map<string, string> input_features;
   std::string dataset_path;
   bool trace = false;
+  int warmup = 0;
 };
 
 class DataLoader {

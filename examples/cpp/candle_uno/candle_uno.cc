@@ -148,8 +148,12 @@ void FlexFlow::top_level_task(Task const *task,
   log_app.print("Num. epochs = %d", ff_config.epochs);
   log_app.print("Num. iterations/epoch = %d",
                 data_loader.num_samples / ff_config.batchSize);
-  double ts_start = Realm::Clock::current_time_in_microseconds();
-  for (int epoch = 0; epoch < ff_config.epochs; epoch++) {
+  Future ts_startf;
+  for (int epoch = -candle_config.warmup; epoch < ff_config.epochs; epoch++) {
+    if (epoch == 0) {
+      Future precond = runtime->issue_execution_fence(ctx);
+      ts_startf = runtime->get_current_time_in_microseconds(ctx, precond);
+    }
     LEGION_PRINT_ONCE(runtime, ctx, stdout, "Epoch: %d\n", epoch);
     data_loader.reset();
     ff.reset_metrics();
@@ -171,11 +175,10 @@ void FlexFlow::top_level_task(Task const *task,
       if (candle_config.trace) runtime->end_trace(ctx, 111 /*trace_id*/);
     }
   }
-  runtime->issue_execution_fence(ctx);
-  TimingLauncher timer(MEASURE_MICRO_SECONDS);
-  Future future = runtime->issue_timing_measurement(ctx, timer);
-  future.get_void_result();
-  double ts_end = Realm::Clock::current_time_in_microseconds();
+  Future precond = runtime->issue_execution_fence(ctx);
+  Future ts_endf = runtime->get_current_time_in_microseconds(ctx, precond);
+  double ts_start = ts_startf.get_result<long long>();
+  double ts_end = ts_endf.get_result<long long>();
   double run_time = 1e-6 * (ts_end - ts_start);
   LEGION_PRINT_ONCE(runtime, ctx, stdout,
          "ELAPSED TIME = %.4fs, THROUGHPUT = %.2f samples/s\n",
@@ -209,6 +212,11 @@ void parse_input_args(char **argv, int argc, CandleConfig &config) {
     }
     if (!strcmp(argv[i], "--trace")) {
       config.trace = true;
+      continue;
+    }
+    if (!strcmp(argv[i], "--warmup")) {
+      config.warmup = atoi(argv[i+1]);
+      i++;
       continue;
     }
   }
