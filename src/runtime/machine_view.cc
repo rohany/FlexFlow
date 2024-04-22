@@ -1,4 +1,5 @@
 #include "flexflow/machine_view.h"
+#include "legion/legion_utilities.h"
 
 namespace FlexFlow {
 
@@ -47,15 +48,17 @@ size_t MachineView::num_parts() const {
 }
 
 size_t MachineView::hash() const {
-  size_t ret = 17;
-  ret = ret * 31 + std::hash<int>()(device_type);
-  ret = ret * 31 + std::hash<int>()(ndims);
-  ret = ret * 31 + std::hash<int>()(start_device_id);
-  for (int i = 0; i < ndims; i++) {
-    ret = ret * 31 + std::hash<int>()(dim[i]);
-    ret = ret * 31 + std::hash<int>()(stride[i]);
-  }
-  return ret;
+  Legion::Internal::Murmur3Hasher hasher;
+  hasher.hash(int(device_type));
+  hasher.hash(ndims);
+  hasher.hash(start_device_id);
+   for (int i = 0; i < ndims; i++) {
+    hasher.hash(dim[i]);
+    hasher.hash(stride[i]);
+   }
+  Legion::Internal::Murmur3Hasher::Hash result;
+  hasher.finalize(result);
+  return result.x;
 }
 
 int MachineView::get_device_id(DomainPoint const &p) const {
